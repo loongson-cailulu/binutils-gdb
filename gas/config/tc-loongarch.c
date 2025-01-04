@@ -118,6 +118,9 @@ static const char default_arch[] = DEFAULT_ARCH;
 
 static bool call36 = 0;
 
+/* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
+int loongarch_cie_data_alignment;
+
 /* The lowest 4-bit is the bytes of instructions.  */
 #define RELAX_BRANCH_16 0xc0000014
 #define RELAX_BRANCH_21 0xc0000024
@@ -532,6 +535,8 @@ md_begin ()
 
   align_hash = htab_create (10, align_sec_sym_hash, align_sec_sym_eq, free);
 
+  loongarch_cie_data_alignment = LARCH_opts.ase_lp64 ? (-8) : (-4);
+
   /* FIXME: expressionS use 'offsetT' as constant,
    * we want this is 64-bit type.  */
   assert (8 <= sizeof (offsetT));
@@ -879,7 +884,7 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
 		      esc_ch1, esc_ch2, bit_field, arg);
 
 	  if (ip->reloc_info[0].type >= BFD_RELOC_LARCH_B16
-	      && ip->reloc_info[0].type <= BFD_RELOC_LARCH_TLS_DESC_PCREL20_S2)
+	      && ip->reloc_info[0].type <= BFD_RELOC_LARCH_PCADD_LO12_I)
 	    {
 	      /* As we compact stack-relocs, it is no need for pop operation.
 		 But break out until here in order to check the imm field.
@@ -1184,8 +1189,10 @@ move_insn (struct loongarch_cl_insn *insn, fragS *frag, long where)
 static void
 append_fixed_insn (struct loongarch_cl_insn *insn)
 {
-  /* Ensure the jirl is emitted to the same frag as the pcaddu18i.  */
-  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type)
+  /* Ensure the jirl is emitted to the same frag as the
+     pcaddu18i/pcaddu12i.  */
+  if (BFD_RELOC_LARCH_CALL36 == insn->reloc_info[0].type
+      || BFD_RELOC_LARCH_CALL32 == insn->reloc_info[0].type)
     frag_grow (8);
 
   char *f = frag_more (insn->insn_length);
@@ -1580,6 +1587,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_TLS_LE_ADD_R:
     case BFD_RELOC_LARCH_TLS_LE_HI20_R:
     case BFD_RELOC_LARCH_TLS_LE_LO12_R:
+    case BFD_RELOC_LARCH_PCADD_TLS_IE_HI20:
+    case BFD_RELOC_LARCH_PCADD_TLS_DESC_HI20:
       /* Add tls lo (got_lo reloc type).  */
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -1839,6 +1848,13 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	*endp = 0;
 	break;
       }
+
+    /* TODO: Record and evaluate the pcrel_hi relocation with
+       local symbol.  */
+    case BFD_RELOC_LARCH_PCADD_HI20:
+    case BFD_RELOC_LARCH_PCADD_GOT_HI20:
+    case BFD_RELOC_LARCH_PCADD_LO12_I:
+      break;
 
     default:
       break;

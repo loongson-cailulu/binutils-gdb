@@ -289,6 +289,36 @@ RELOC_NUMBER (R_LARCH_TLS_LD_PCREL20_S2, 124)
 RELOC_NUMBER (R_LARCH_TLS_GD_PCREL20_S2, 125)
 RELOC_NUMBER (R_LARCH_TLS_DESC_PCREL20_S2, 126)
 
+/* LA32 medium call
+   pcaddu12i
+   %call32(sym).  */
+RELOC_NUMBER (R_LARCH_CALL32, 127)
+
+/* LA32 PCREL
+   pcaddu12i
+   %pcadd_hi20(sym).  */
+RELOC_NUMBER (R_LARCH_PCADD_HI20, 128)
+
+/* LA32 GOT
+   pcaddu12i
+   %pcadd_got_hi20(sym).  */
+RELOC_NUMBER (R_LARCH_PCADD_GOT_HI20, 129)
+
+/* LA32 TLS IE
+   pcaddu12i
+   %pcadd_ie_hi20(sym).  */
+RELOC_NUMBER (R_LARCH_PCADD_TLS_IE_HI20, 130)
+
+/* LA32 TLS DESC
+   pcaddu12i
+   %pcadd_desc_hi20(sym).  */
+RELOC_NUMBER (R_LARCH_PCADD_TLS_DESC_HI20, 131)
+
+/* LA32 PCREL
+   addi.w/ld.[bhw]
+   %pcadd_lo12(sym).  */
+RELOC_NUMBER (R_LARCH_PCADD_LO12_I, 132)
+
 END_RELOC_NUMBERS (R_LARCH_count)
 
 /* Processor specific flags for the ELF header e_flags field.  */
