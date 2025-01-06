@@ -2167,6 +2167,18 @@ reloc_bits_sanity (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val,
 	 so the high part need to add 0x8000.  */
       val = (((val + 0x8000) >> 16) << 5) | (((val & 0xffff) << 10) << 32);
       break;
+    case R_LARCH_CALL32:
+      /* call32 = pcaddu12i+jirl, the jirl immediate field has 16 bits,
+	 and the sign extension at run time does not affect the result.
+	 But at link time we need to sign-extend the lower 12 bits of
+	 the offset to write the 16-bit immediate field of jirl.
+	 Since there is "val = val >> howto->rightshift" in front, only
+	 the lower 10 bits need to be sign-extended.  */
+      bfd_vma off_lo = val & 0x3ff;
+      /* Sign extension.  */
+      off_lo = (off_lo ^ 0x400) - 0x400;
+      val = ((val >> 10) << 5) | (((off_lo & 0xffff) << 10) << 32);
+      break;
     default:
       val <<= howto->bitpos;
       break;
