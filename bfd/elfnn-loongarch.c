@@ -729,9 +729,12 @@ loongarch_elf_record_tls_and_got_reference (bfd *abfd,
   char *new_tls_type = &_bfd_loongarch_elf_tls_type (abfd, h, symndx);
   *new_tls_type |= tls_type;
 
+  /* BUG: If TLS transition is not enabled, GOT_TLS_GDESC should be
+     reserved for allocating GOT entries, otherwise there will be a
+     runtime error.  */
   /* If a symbol is accessed by both IE and DESC, relax DESC to IE.  */
-  if ((*new_tls_type & GOT_TLS_IE) && (*new_tls_type & GOT_TLS_GDESC))
-    *new_tls_type &= ~ (GOT_TLS_GDESC);
+//  if ((*new_tls_type & GOT_TLS_IE) && (*new_tls_type & GOT_TLS_GDESC))
+//    *new_tls_type &= ~ (GOT_TLS_GDESC);
   if ((*new_tls_type & GOT_NORMAL) && (*new_tls_type & ~GOT_NORMAL))
     {
       _bfd_error_handler (_("%pB: `%s' accessed both as normal and "
