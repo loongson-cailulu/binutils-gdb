@@ -2175,8 +2175,6 @@ reloc_bits_sanity (bfd *abfd, reloc_howto_type *howto, bfd_vma *fix_val,
 	 Since there is "val = val >> howto->rightshift" in front, only
 	 the lower 10 bits need to be sign-extended.  */
       bfd_vma off_lo = val & 0x3ff;
-      /* Sign extension.  */
-      off_lo = (off_lo ^ 0x400) - 0x400;
       val = ((val >> 10) << 5) | (((off_lo & 0xffff) << 10) << 32);
       break;
     default:
